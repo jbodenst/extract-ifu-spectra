@@ -11,12 +11,53 @@ import traceback
 from photutils import EPSFBuilder
 import lmfit
 from julia_utils import spec_functions as spec
+from julia_utils import input_output as inout
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle
 from astropy.visualization import simple_norm
 
 
+##############################################################################
+# Definition of class Star
+##############################################################################
+class Star:
+    def __init__(self, id, xcoord, ycoord, ra, dec, uv_mag, ir_mag,
+                 fname='None'):
+        self.star_id = id  # star id
+        self.xcoord = xcoord  # pixel x coordinate
+        self.ycoord = ycoord  # pixel y coordinate
+        self.ra = ra  # deg, from HST input list, not shift
+        self.dec = dec  # deg, from HST input list, not shifted
+        self.uv_mag = uv_mag  # uv magnitude from input list
+        self.ir_mag = ir_mag  # ir magnitude from input list
+        self.flux = []  # flux ( to be filled )
+        self.flux_err = []  # err ( to be filled )
+        self.filename = fname
+
+    def find_closeby(self, star2, crit_dist):
+        # crit_dist: distance [px] < 2 stars are thought to considered together
+        distance = ((self.xcoord - star2.xcoord)**2 +
+                    (self.ycoord - star2.ycoord)**2)**0.5
+
+        if distance < crit_dist:
+            return True
+        else:
+            return False
+
+    # save the spectrum of the star
+    def save_spectrum(self, fitspath, num_stars):
+        # prepare the header
+        header = inout.prep_header(fitspath, self.star_id, self.xcoord,
+                                   self.ycoord, self.ra, self.dec, self.uv_mag,
+                                   self.ir_mag, num_stars)
+        #  write out the spectrum
+        outfilename = self.filename + '.fits'
+        inout.write_extracted_spectrum(outfilename, header, self.flux,
+                                       self.flux_err)
+
 # convenience function to simplify plotting
+
+
 def plot_spatial(image, plotfname='spatial.pdf', coords1='None',
                  coords2='None', stars='None', mags='False', annotate='no',
                  interactive=False):
@@ -24,7 +65,7 @@ def plot_spatial(image, plotfname='spatial.pdf', coords1='None',
     norm = simple_norm(image, 'sqrt', percent=90.)
     axes.imshow(image, aspect=1, origin='lower', cmap='Greys', norm=norm)
 
-    if coords1 is not 'None':
+    if coords1 != 'None':
         coords1_x, coords1_y = coords1[0], coords1[1]
         for i in range(len(coords1_x)):
             e = Circle(xy=(coords1_x[i], coords1_y[i]), radius=4)
@@ -32,7 +73,7 @@ def plot_spatial(image, plotfname='spatial.pdf', coords1='None',
             e.set_edgecolor('deeppink')
             axes.add_artist(e)
 
-    if coords2 is not 'None':
+    if coords2 != 'None':
         coords2_x, coords2_y = coords2[0], coords2[1]
         for j in range(len(coords2_x)):
             e = Circle(xy=(coords2_x[j], coords2_y[j]), radius=3)
@@ -40,7 +81,7 @@ def plot_spatial(image, plotfname='spatial.pdf', coords1='None',
             e.set_edgecolor('blue')
             axes.add_artist(e)
 
-    if ((stars is not 'None') & (mags == 'False')):
+    if ((stars != 'None') & (mags == 'False')):
         for star in stars:
             e = Circle(xy=(star.xcoord, star.ycoord), radius=3)
             e.set_facecolor('none')
@@ -50,7 +91,7 @@ def plot_spatial(image, plotfname='spatial.pdf', coords1='None',
                               (5, 5), textcoords='offset points',
                               color='deeppink')
             axes.add_artist(e)
-    if ((stars is not 'None') & (mags == 'True')):
+    if ((stars != 'None') & (mags == 'True')):
         for star in stars:
             e = Circle(xy=(star.xcoord, star.ycoord),
                        radius=(18-star.ir_mag)*2)
@@ -64,7 +105,7 @@ def plot_spatial(image, plotfname='spatial.pdf', coords1='None',
 
     fig.savefig(plotfname, bbox_inches='tight')
 
-    if interactive == True:
+    if interactive:
         plt.show()
 
 
