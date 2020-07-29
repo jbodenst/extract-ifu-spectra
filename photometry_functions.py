@@ -427,10 +427,6 @@ def phot_per_star(final_starlist, obs_id, fits_path, phot, fitspath,
     # select current star from master starlist
     star = final_starlist[star_index]
 
-    # spec_min_mag = 17.5
-    # if ((star.uv_mag <= spec_min_mag) &
-    #     (star.xcoord > 0) & (star.xcoord < cube.shape[1]) &
-    #         (star.ycoord > 0) & (star.ycoord < cube.shape[2])):
     filename = obs_id + '_id' + str(star.star_id)
     star.filename = filename
 
@@ -445,7 +441,7 @@ def phot_per_star(final_starlist, obs_id, fits_path, phot, fitspath,
     else:
         try:
             logfile.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' ' +
-                          "File does not exist, starting with extraction.\n")
+                          "Starting with extraction of spectra.\n")
 
             # star positions to consider when fitting the star of interest
             x_pos, y_pos = [], []
