@@ -9,7 +9,7 @@ from astropy.table import Table
 from photutils.psf import DAOGroup
 from astropy.modeling.fitting import LevMarLSQFitter
 from photutils.psf.photometry import BasicPSFPhotometry
-from julia_utils import photometry_functions as phot_funcs
+import photometry_functions as phot_funcs
 
 
 start_time = time.time()
