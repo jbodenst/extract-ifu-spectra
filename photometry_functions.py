@@ -18,8 +18,8 @@ from photutils import EPSFBuilder
 from photutils.psf import extract_stars
 from photutils.psf import photometry
 from photutils.psf import DAOGroup
-from julia_utils import spec_functions as spec
-from julia_utils import input_output as inout
+import spec_functions as spec
+import input_output as inout
 
 
 ##############################################################################
