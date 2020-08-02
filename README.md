@@ -22,3 +22,15 @@ extract_spectra.py [infile]
   Performs PSF fitting at a fixed position for the first star in the input file but simultaneously fitting
    the PSFs of all other stars in the input file to take into account their contributions
   
+Dependencies:
+
+*Author:*
+Julia Bodensteiner
+PhD student
+Institute of Astronomy, KU Leuven
+Celestijnenlaan 200D
+3001 Leuven
+Belgium
+email: julia.bodensteiner@kuleuven.be
+
+Date: 2nd of Aug, 2020
