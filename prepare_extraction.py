@@ -1,6 +1,7 @@
+import modules.photometry_functions as phot_funcs
 from astropy.io import fits
-from julia_utils import photometry_functions as phot_funcs
 from astropy.wcs import WCS
+
 
 """
 Convenience function to prepare input file required by extract_spectra.py.

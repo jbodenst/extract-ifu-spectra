@@ -2,6 +2,8 @@
 Python software to extract spectra from a 3D data cube (i.e. an IFU like MUSE@VLT).
 
 
+**Usage:**
+
 prepare_extraction.py:
   Convenience function to prepare input file required by extract_spectra.py.
   Assumes that table with HST photometry exists (columns: RA, DEC, F336W, F814W)
@@ -21,10 +23,18 @@ extract_spectra.py [infile]
   Requires an input file containing id,x,y,ra,dec,f336_mag,f814_mag (as created by prepare_extraction.py)
   Performs PSF fitting at a fixed position for the first star in the input file but simultaneously fitting
    the PSFs of all other stars in the input file to take into account their contributions
-  
-Dependencies:
 
-*Author:*
+  
+**Dependencies:**
+
+* photutils 	0.7.2
+* astropy	3.2.3
+* pandas 	0.25.3
+* lmfit		1.0.0
+
+
+**Author:**
+
 Julia Bodensteiner
 PhD student
 Institute of Astronomy, KU Leuven
@@ -32,5 +42,6 @@ Celestijnenlaan 200D
 3001 Leuven
 Belgium
 email: julia.bodensteiner@kuleuven.be
+
 
 Date: 2nd of Aug, 2020
