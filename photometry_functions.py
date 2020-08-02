@@ -1,7 +1,4 @@
-import time
-import os
 import math
-import traceback
 import numpy as np
 import lmfit
 import pandas as pd
@@ -18,8 +15,7 @@ from photutils import EPSFBuilder
 from photutils.psf import extract_stars
 from photutils.psf import photometry
 from photutils.psf import DAOGroup
-import spec_functions as spec
-import input_output as inout
+import misc
 
 
 ##############################################################################
@@ -52,13 +48,13 @@ class Star:
     # save the spectrum of the star
     def save_spectrum(self, fitspath, num_stars):
         # prepare the header
-        header = inout.prep_header(fitspath, self.star_id, self.xcoord,
-                                   self.ycoord, self.ra, self.dec, self.uv_mag,
-                                   self.ir_mag, num_stars)
+        header = misc.prep_header(fitspath, self.star_id, self.xcoord,
+                                  self.ycoord, self.ra, self.dec, self.uv_mag,
+                                  self.ir_mag, num_stars)
         #  write out the spectrum
         outfilename = self.filename + '.fits'
-        inout.write_extracted_spectrum(outfilename, header, self.flux,
-                                       self.flux_err)
+        misc.write_extracted_spectrum(outfilename, header, self.flux,
+                                      self.flux_err)
 
 
 # convenience function to simplify plotting
@@ -242,7 +238,7 @@ def get_psf(data, starlist_x, starlist_y, do_plot='no', n_resample=4):
     len_x = len(epsf.data[0, :])
     x = np.linspace(0, 100, len_x)
     cutthrough = epsf.data[int(len(x)/2), :]
-    minimizer = lmfit.Minimizer(spec.single_egauss, params,
+    minimizer = lmfit.Minimizer(misc.single_egauss, params,
                                 fcn_args=(x, cutthrough))
     result = minimizer.minimize()
 
@@ -268,7 +264,7 @@ def get_psf(data, starlist_x, starlist_y, do_plot='no', n_resample=4):
             lab = 'x = ' + str(xval)
             ax1.plot(x, cutthrough, label=lab)
 
-        g = spec.emission_gaussian(x, h, cen, gauss_std)
+        g = misc.emission_gaussian(x, h, cen, gauss_std)
         ax1.plot(x, g, label='Gaussian fit')
         ax1.set_xlabel('x coordinate [px]')
         ax1.set_ylabel('EPSF normalized flux')
@@ -417,64 +413,3 @@ def do_phot_star(star_index, fits_path, pos, phot, logfile):
     logfile.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' ' +
                   "Done with photometry for star number %i \n" % star_index)
     return flux_arr, flux_err_arr
-
-
-# convenience function, not used at the moment => extract_spectra.py
-def phot_per_star(final_starlist, obs_id, fits_path, phot, fitspath,
-                  star_index):
-    start_time = time.time()
-
-    # select current star from master starlist
-    star = final_starlist[star_index]
-
-    filename = obs_id + '_id' + str(star.star_id)
-    star.filename = filename
-
-    # create a logfile
-    logfilename = star.filename + '.log'
-    logfile = open(logfilename, 'w')
-
-    if os.path.isfile(star.filename + '.fits'):
-        logfile.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' ' +
-                      "Spectrum already extracted. Continue with next.\n")
-
-    else:
-        try:
-            logfile.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' ' +
-                          "Starting with extraction of spectra.\n")
-
-            # star positions to consider when fitting the star of interest
-            x_pos, y_pos = [], []
-
-            # first: append the star of interest
-            x_pos.append(star.xcoord), y_pos.append(star.ycoord)
-
-            # append all stars that are close by (closer than crit_dist)
-            crit_dist = 12.  # px
-
-            # loop over stars in master starlist and find close-by stars
-            for star2 in final_starlist:
-                if star.xcoord != star2.xcoord:
-                    if star2.find_closeby(star, crit_dist):
-                        # if star is close by, get position
-                        x, y = star2.xcoord, star2.ycoord
-                        x_pos.append(x), y_pos.append(y)
-
-            # create positions table to put into photometry
-            pos = Table(names=['x_0', 'y_0'], data=[x_pos, y_pos])
-
-            star.flux, star.flux_err = do_phot_star(star.star_id, fits_path,
-                                                    pos, phot, logfile)
-            # save obtained spectrum, pass MUSE infile for header infos
-            logfile.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' ' +
-                          "Saving the spectrum now.\n")
-
-            num_stars = len(pos) - 1
-            star.save_spectrum(fitspath, num_stars)
-        except Exception:  # as (errno, strerror):
-            logfile.write(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
-            traceback.print_exc(file=logfile)
-
-    elapsed_time = (time.time() - start_time)
-    logfile.write("Fitting required %f s." % elapsed_time)
-    logfile.close()
