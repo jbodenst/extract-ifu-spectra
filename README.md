@@ -19,10 +19,12 @@ prepare_extraction.py:
 
 
 extract_spectra.py [infile]
+
   Does the actual extraction via PSF fitting
   Requires an input file containing id,x,y,ra,dec,f336_mag,f814_mag (as created by prepare_extraction.py)
   Performs PSF fitting at a fixed position for the first star in the input file but simultaneously fitting
-   the PSFs of all other stars in the input file to take into account their contributions
+   the PSFs of all other stars in the input file to take into account their contributions. 
+  Saves the spectrum as a fits file
 
   
 **Dependencies:**
