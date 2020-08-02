@@ -18,8 +18,7 @@ from photutils import EPSFBuilder
 from photutils.psf import extract_stars
 from photutils.psf import photometry
 from photutils.psf import DAOGroup
-import spec_functions as spec
-import input_output as inout
+import misc
 
 
 ##############################################################################
@@ -52,13 +51,13 @@ class Star:
     # save the spectrum of the star
     def save_spectrum(self, fitspath, num_stars):
         # prepare the header
-        header = inout.prep_header(fitspath, self.star_id, self.xcoord,
-                                   self.ycoord, self.ra, self.dec, self.uv_mag,
-                                   self.ir_mag, num_stars)
+        header = misc.prep_header(fitspath, self.star_id, self.xcoord,
+                                  self.ycoord, self.ra, self.dec, self.uv_mag,
+                                  self.ir_mag, num_stars)
         #  write out the spectrum
         outfilename = self.filename + '.fits'
-        inout.write_extracted_spectrum(outfilename, header, self.flux,
-                                       self.flux_err)
+        misc.write_extracted_spectrum(outfilename, header, self.flux,
+                                      self.flux_err)
 
 
 # convenience function to simplify plotting
@@ -242,7 +241,7 @@ def get_psf(data, starlist_x, starlist_y, do_plot='no', n_resample=4):
     len_x = len(epsf.data[0, :])
     x = np.linspace(0, 100, len_x)
     cutthrough = epsf.data[int(len(x)/2), :]
-    minimizer = lmfit.Minimizer(spec.single_egauss, params,
+    minimizer = lmfit.Minimizer(misc.single_egauss, params,
                                 fcn_args=(x, cutthrough))
     result = minimizer.minimize()
 
@@ -268,7 +267,7 @@ def get_psf(data, starlist_x, starlist_y, do_plot='no', n_resample=4):
             lab = 'x = ' + str(xval)
             ax1.plot(x, cutthrough, label=lab)
 
-        g = spec.emission_gaussian(x, h, cen, gauss_std)
+        g = misc.emission_gaussian(x, h, cen, gauss_std)
         ax1.plot(x, g, label='Gaussian fit')
         ax1.set_xlabel('x coordinate [px]')
         ax1.set_ylabel('EPSF normalized flux')
